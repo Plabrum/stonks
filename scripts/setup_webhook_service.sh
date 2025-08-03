@@ -5,7 +5,7 @@ SERVICE_NAME="webhook"
 SERVICE_FILE="/etc/systemd/system/${SERVICE_NAME}.service"
 USER="$(whoami)"
 WORKDIR="/home/${USER}/repos/stonks/scripts"
-EXEC_START="/usr/bin/python3 ${WORKDIR}/webhook_listener.py"
+EXEC_START="/usr/bin/python3 ${WORKDIR}/deploy_webhook_listener.py"
 
 # You can adjust these variables above if needed
 
