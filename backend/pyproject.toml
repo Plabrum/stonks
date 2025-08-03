@@ -1,0 +1,7 @@
+[project]
+name = "Stonks"
+version = "0.1.0"
+description = "Minimal Litestar backend using uv"
+requires-python = ">=3.10"
+readme = "README.md"
+dependencies = ["litestar[standard]>=2.16.0"]
