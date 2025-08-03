@@ -3,8 +3,8 @@ set -e
 
 SERVICE_NAME="webhook"
 SERVICE_FILE="/etc/systemd/system/${SERVICE_NAME}.service"
-USER="ubuntu"
-WORKDIR="/home/ubuntu/deploy"
+USER="$(whoami)"
+WORKDIR="/home/${USER}/repos/stonks/scripts"
 EXEC_START="/usr/bin/python3 ${WORKDIR}/webhook_listener.py"
 
 # You can adjust these variables above if needed
