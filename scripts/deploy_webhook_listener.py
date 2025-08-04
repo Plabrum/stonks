@@ -13,8 +13,18 @@ def webhook():
         return "WORKDIR environment variable not set", 500
 
     deploy_script = os.path.join(workdir, "scripts", "deploy.sh")
-    subprocess.Popen(["/bin/bash", deploy_script])
-    return "Deploy started", 200
+
+    try:
+        result = subprocess.run(
+            ["/bin/bash", deploy_script],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=True,
+            text=True,  # decode bytes to string
+        )
+        return f"Deploy succeeded:\n{result.stdout}", 200
+    except subprocess.CalledProcessError as e:
+        return f"Deploy failed:\n{e.stderr}", 500
 
 
 if __name__ == "__main__":
