@@ -1,0 +1,10 @@
+services:
+  litestar-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - WORKDIR=/app
+    restart: always

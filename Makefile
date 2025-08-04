@@ -20,3 +20,18 @@ build:
 server:
 	@echo "Running deploy script locally..."
 	bash $(DEPLOY_SCRIPT)
+
+.PHONY: dc-up
+dc-up:
+	@echo "Starting Docker Compose services..."
+	cd $(BACKEND_DIR) && docker compose up -d
+
+.PHONY: dc-down
+dc-down:
+	@echo "Stopping Docker Compose services..."
+	cd $(BACKEND_DIR) && docker compose down
+
+.PHONY: dc-build
+dc-build:
+	@echo "Building Docker Compose services..."
+	cd $(BACKEND_DIR) && docker compose build
