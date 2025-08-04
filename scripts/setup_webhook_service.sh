@@ -1,6 +1,13 @@
 #!/bin/bash
 set -e
 
+# Load environment variables from .env file
+if [ -f .env ]; then
+  set -a
+  source .env
+  set +a
+fi
+
 SERVICE_NAME="webhook"
 SERVICE_FILE="/etc/systemd/system/${SERVICE_NAME}.service"
 USER="$(whoami)"

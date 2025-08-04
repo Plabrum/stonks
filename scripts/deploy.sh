@@ -7,12 +7,12 @@ if [ -f .env ]; then
   set +a
 fi
 
-BACKEND_DIR="${WORKDIR}/backend"
-
-if [ -z "$BACKEND_DIR" ]; then
+if [ -z "$WORKDIR" ]; then
   echo "Error: WORKDIR not set. Please specify in .env or environment."
   exit 1
 fi
+
+BACKEND_DIR="${WORKDIR}/backend"
 
 cd "$BACKEND_DIR"
 
