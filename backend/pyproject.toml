@@ -4,4 +4,14 @@ version = "0.1.0"
 description = "Minimal Litestar backend using uv"
 requires-python = ">=3.10"
 readme = "README.md"
-dependencies = ["litestar[standard]>=2.16.0"]
+dependencies = [
+  "litestar[standard]",
+  "litestar[sqlalchemy]",
+  "taskiq-litestar",
+  "taskiq-pg",
+  "taskiq[schedule]",
+  "taskiq[postgres]",
+  "msgspec",
+  "psycopg2-binary>=2.9.10",
+  "asyncpg>=0.30.0",
+]
