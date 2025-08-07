@@ -36,6 +36,7 @@ ExecStart=${EXEC_START}
 Restart=always
 RestartSec=5
 Environment=FLASK_ENV=production
+Environment=WORKDIR=${WORKDIR}
 StandardOutput=syslog
 StandardError=syslog
 SyslogIdentifier=${SERVICE_NAME}

@@ -37,7 +37,7 @@ fi
 
 # === Deploy stack ===
 echo "📦 Deploying stack '$STACK_NAME' to Docker Swarm..."
-docker stack deploy -c docker-compose.yml "$STACK_NAME"
+docker stack deploy -c docker-compose.yml -c docker-compose.override.prod.yml "$STACK_NAME"
 
 # === Wait for replicas to be healthy ===
 echo "⏳ Waiting for service '$SERVICE_NAME' to be healthy..."
