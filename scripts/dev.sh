@@ -2,7 +2,7 @@
 set -e
 
 echo "Starting dockerized Postgres..."
-docker compose -f backend/docker-compose-development.yaml up -d
+docker compose -f docker-compose.yaml up -d
 
 echo "Starting backend and frontend..."
 

@@ -5,6 +5,10 @@ BACKEND_DIR=backend
 DEPLOY_SCRIPT=scripts/deploy.sh
 DEV_SCRIPT=scripts/dev.sh
 
+.PHONY: help
+help:
+	@grep -E '^[a-zA-Z0-9 -]+:.*#'  Makefile | sort | while read -r l; do printf "\033[1;32m$$(echo $$l | cut -f 1 -d':')\033[00m:$$(echo $$l | cut -f 2- -d'#')\n"; done
+
 .PHONY: dev
 dev:
 	bash $(DEV_SCRIPT)
@@ -35,3 +39,4 @@ dc-down:
 dc-build:
 	@echo "Building Docker Compose services..."
 	cd $(BACKEND_DIR) && docker compose build
+

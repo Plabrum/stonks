@@ -20,4 +20,4 @@ ENV PATH="/app/.venv/bin:$PATH"
 
 ENTRYPOINT []
 
-CMD ["litestar", "dev", "--host", "0.0.0.0", "src.app.main"]
+CMD ["litestar", "run", "--host", "0.0.0.0", "--app"]
