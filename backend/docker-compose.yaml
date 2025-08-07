@@ -27,6 +27,8 @@ services:
         failure_action: pause
         monitor: 30s
         max_failure_ratio: 0.3
+    networks:
+      - stonks-net
 
   # 🐘 PostgreSQL
   postgres:
@@ -48,6 +50,8 @@ services:
     deploy:
       restart_policy:
         condition: on-failure
+    networks:
+      - stonks-net
 
   # 📊 Grafana
   grafana:
@@ -63,6 +67,8 @@ services:
       - prometheus
       - loki
     restart: unless-stopped
+    networks:
+      - stonks-net
 
   # 📈 Prometheus
   prometheus:
@@ -77,6 +83,8 @@ services:
       - --storage.tsdb.retention.time=30d
       - --storage.tsdb.path=/prometheus
     restart: unless-stopped
+    networks:
+      - stonks-net
 
   # 📦 Loki (logs)
   loki:
@@ -88,6 +96,8 @@ services:
       - loki-data:/loki
     command: -config.file=/etc/loki/local-config.yaml
     restart: unless-stopped
+    networks:
+      - stonks-net
 
   # 📄 Promtail (log shipper)
   promtail:
@@ -100,9 +110,15 @@ services:
     depends_on:
       - loki
     restart: unless-stopped
+    networks:
+      - stonks-net
 
 volumes:
   pgdata:
   grafana-data:
   prom-data:
   loki-data:
+
+networks:
+  stonks-net:
+    driver: overlay

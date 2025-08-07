@@ -1,0 +1,4 @@
+services:
+  postgres:
+    deploy:
+      replicas: 0
