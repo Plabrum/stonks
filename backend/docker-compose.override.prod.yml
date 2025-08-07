@@ -2,3 +2,105 @@ services:
   postgres:
     deploy:
       replicas: 0
+
+    # ⚙️ Litestar app
+  litestar-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: litestar-app-image
+    ports:
+      - "8000:8000"
+    environment:
+      - WORKDIR=/app
+    restart: always
+    depends_on:
+      - postgres
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: on-failure
+      update_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: pause
+        monitor: 30s
+        max_failure_ratio: 0.3
+    networks:
+      - stonks-net
+
+  # 📊 Grafana
+  grafana:
+    image: grafana/grafana:10.3.1
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+      - prometheus
+      - loki
+    restart: unless-stopped
+    networks:
+      - stonks-net
+
+  # 📈 Prometheus
+  prometheus:
+    image: prom/prometheus:v2.52.0
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./observability_stack/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prom-data:/prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.retention.time=30d
+      - --storage.tsdb.path=/prometheus
+    restart: unless-stopped
+    networks:
+      - stonks-net
+
+  # 📦 Loki (logs)
+  loki:
+    image: grafana/loki:2.9.4
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./observability_stack/loki/loki-config.yml:/etc/loki/local-config.yaml
+      - loki-data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+    restart: unless-stopped
+    networks:
+      - stonks-net
+
+  # 📄 Promtail (log shipper)
+  promtail:
+    image: grafana/promtail:2.9.4
+    volumes:
+      - /var/log:/var/log:ro
+      - /etc/hostname:/etc/hostname:ro
+      - ./observability_stack/promtail/promtail-config.yml:/etc/promtail/config.yml
+    command: -config.file=/etc/promtail/config.yml
+    depends_on:
+      - loki
+    restart: unless-stopped
+    networks:
+      - stonks-net
+
+volumes:
+  pgdata:
+  grafana-data:
+  prom-data:
+  loki-data:
+
+networks:
+  stonks-net:
+    external: true
+    name: backend_stonks-net
