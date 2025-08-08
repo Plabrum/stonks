@@ -1,10 +1,10 @@
 from datetime import datetime
 from typing import Dict, List, Literal, Optional
 
-import msgspec
+from msgspec import Struct
 
 
-class FilingSchema(msgspec.Struct, kw_only=True):
+class FilingSchema(Struct, kw_only=True):
     id: str
     cik: str
     company_id: str
@@ -30,7 +30,7 @@ class FilingSchema(msgspec.Struct, kw_only=True):
     updated_at: datetime
 
 
-class CompanyStatsSchema(msgspec.Struct, kw_only=True):
+class CompanyStatsSchema(Struct, kw_only=True):
     ltm_revenue: Optional[float] = None
     ltm_revenue_growth: Optional[float] = None
     ltm_net_income: Optional[float] = None
@@ -51,17 +51,17 @@ class CompanyStatsSchema(msgspec.Struct, kw_only=True):
     median_fund_investment_percentage_change: Optional[float] = None
 
 
-class CompanyComparablesSchema(msgspec.Struct, kw_only=True):
+class CompanyComparablesSchema(Struct, kw_only=True):
     median_ev_to_revenue: Optional[float] = None
     median_ev_to_ebitda: Optional[float] = None
     median_pe_ratio: Optional[float] = None
 
 
-class CompanyPredictionsSchema(msgspec.Struct, kw_only=True):
+class CompanyPredictionsSchema(Struct, kw_only=True):
     projected_5y_share_price: Optional[float] = None
 
 
-class CompanySchema(msgspec.Struct, kw_only=True):
+class CompanySchema(Struct, kw_only=True):
     id: str
     name: str
     ticker: str
@@ -78,35 +78,35 @@ class CompanySchema(msgspec.Struct, kw_only=True):
     updated_at: datetime
 
 
-class SortCriterion(msgspec.Struct, kw_only=True):
+class SortCriterion(Struct, kw_only=True):
     field: str
     direction: Literal["asc", "desc"]
 
 
-class NumericRange(msgspec.Struct, kw_only=True):
+class NumericRange(Struct, kw_only=True):
     min: Optional[float] = None
     max: Optional[float] = None
 
 
-class CompanySearchFilters(msgspec.Struct, kw_only=True):
+class CompanySearchFilters(Struct, kw_only=True):
     industries: Optional[List[str]] = None
     subIndustries: Optional[List[str]] = None
     numericRanges: Optional[Dict[str, NumericRange]] = None
 
 
-class Pagination(msgspec.Struct, kw_only=True):
+class Pagination(Struct, kw_only=True):
     offset: Optional[int] = None
     limit: Optional[int] = None
 
 
-class CompanySearchSchema(msgspec.Struct, kw_only=True):
+class CompanySearchSchema(Struct, kw_only=True):
     search: Optional[str] = None
     filters: Optional[CompanySearchFilters] = None
     sorting: Optional[List[SortCriterion]] = None
     pagination: Optional[Pagination] = None
 
 
-class CompanySearchResultSchema(msgspec.Struct, kw_only=True):
+class CompanySearchResultSchema(Struct, kw_only=True):
     id: str
     name: str
     ticker: str

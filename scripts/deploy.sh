@@ -28,7 +28,7 @@ git pull origin main
 
 # === Build image ===
 echo "🔨 Building Docker image: $IMAGE_NAME"
-docker build -t "$IMAGE_NAME" .
+docker build -t "$IMAGE_NAME" "$BACKEND_DIR"
 
 # === Confirm image is referenced in docker-compose.yml ===
 if ! grep -q "$IMAGE_NAME" docker-compose.yml; then

@@ -15,8 +15,10 @@ from app.company.schemas import (
 )
 
 
-@get("/{ticker:str}")
-async def get_company(ticker: str, transaction: AsyncSession) -> CompanySchema:
+@get("/{ticker:str}", operation_id="get_by_ticker")
+async def get_by_ticker(
+    ticker: str, transaction: AsyncSession
+) -> CompanySchema:
     # Logic to retrieve company data based on the slug
     return CompanySchema(
         id="company_001",
@@ -90,8 +92,8 @@ async def get_company(ticker: str, transaction: AsyncSession) -> CompanySchema:
     )
 
 
-@post("/search")
-async def search_companies(
+@post("/search", operation_id="search")
+async def search(
     data: CompanySearchSchema, transaction: AsyncSession
 ) -> List[CompanySearchResultSchema]:
     # In a real application, you would use the data from the `data` argument
@@ -235,5 +237,5 @@ async def search_companies(
 
 
 companies_router = Router(
-    path="/company", route_handlers=[get_company, search_companies]
+    path="/company", route_handlers=[get_by_ticker, search], tags=["company"]
 )
