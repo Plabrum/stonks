@@ -24,7 +24,14 @@ import {
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Filter, ArrowUpDown, ArrowUp, ArrowDown, Plus } from "lucide-react";
+import {
+  Filter,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  Plus,
+  ExternalLink,
+} from "lucide-react";
 import { cn, formatCurrency } from "@/lib/utils";
 import {
   CompanySearchResultSchema,
@@ -48,12 +55,8 @@ function RangeFilter({
   onClear,
   formatValue,
 }: RangeFilterProps) {
-  const [min, setMin] = useState<string>(
-    value?.min != null ? value.min.toString() : "",
-  );
-  const [max, setMax] = useState<string>(
-    value?.max != null ? value.max.toString() : "",
-  );
+  const [min, setMin] = useState<string>(value?.min?.toString() || "");
+  const [max, setMax] = useState<string>(value?.max?.toString() || "");
   const [isOpen, setIsOpen] = useState(false);
 
   const handleApply = () => {
@@ -149,7 +152,6 @@ function RangeFilter({
 
 interface CompanyTableProps {
   companiesData: CompanySearchResultSchema[];
-  isLoading: boolean;
   searchSchema: CompanySearchSchema;
   industries: string[];
   onSort: (field: string) => void;
@@ -194,6 +196,8 @@ export function CompanyTable({
                 Company Name {getSortIcon("name")}
               </div>
             </TableHead>
+            <TableHead>Description</TableHead>
+            <TableHead>Website</TableHead>
             <TableHead
               onClick={() => onSort("industry")}
               className="cursor-pointer"
@@ -233,16 +237,57 @@ export function CompanyTable({
               </div>
             </TableHead>
             <TableHead
-              onClick={() => onSort("equity_value")}
+              onClick={() => onSort("sub_industry")}
               className="cursor-pointer"
             >
               <div className="flex items-center gap-2">
-                Market Cap {getSortIcon("equity_value")}
+                Sub-Industry {getSortIcon("sub_industry")}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className={cn(
+                        "h-8 w-8 p-0",
+                        (searchSchema.filters?.subIndustries?.length || 0) >
+                          0 && "bg-primary text-primary-foreground",
+                      )}
+                    >
+                      <Filter className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                </DropdownMenu>
+              </div>
+            </TableHead>
+            <TableHead
+              onClick={() => onSort("stats.share_price")}
+              className="cursor-pointer"
+            >
+              <div className="flex items-center gap-2">
+                Share Price {getSortIcon("stats.share_price")}
                 <RangeFilter
-                  field="equity_value"
+                  field="stats.share_price"
+                  label="Share Price"
+                  value={
+                    searchSchema.filters?.numericRanges?.["stats.share_price"]
+                  }
+                  onApply={onRangeFilter}
+                  onClear={clearRangeFilter}
+                  formatValue={(v) => `${v.toFixed(2)}`}
+                />
+              </div>
+            </TableHead>
+            <TableHead
+              onClick={() => onSort("stats.equity_value")}
+              className="cursor-pointer"
+            >
+              <div className="flex items-center gap-2">
+                Market Cap {getSortIcon("stats.equity_value")}
+                <RangeFilter
+                  field="stats.equity_value"
                   label="Market Cap"
                   value={
-                    searchSchema.filters?.numericRanges?.["equity_value"]
+                    searchSchema.filters?.numericRanges?.["stats.equity_value"]
                   }
                   onApply={onRangeFilter}
                   onClear={clearRangeFilter}
@@ -263,9 +308,30 @@ export function CompanyTable({
                   {company.name}
                 </Link>
               </TableCell>
+              <TableCell className="max-w-xs">
+                <div className="text-sm text-muted-foreground line-clamp-2">
+                  {company.description}
+                </div>
+              </TableCell>
+              <TableCell>
+                {company.website && (
+                  <a
+                    href={company.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 text-blue-600 hover:text-blue-800 text-sm"
+                  >
+                    {company.website.replace("https://", "")}
+                    <ExternalLink className="h-3 w-3" />
+                  </a>
+                )}
+              </TableCell>
               <TableCell>{company.industry}</TableCell>
               <TableCell>
-                {formatCurrency(company.equity_value)}
+                {formatCurrency(company.stats?.share_price)}
+              </TableCell>
+              <TableCell>
+                {formatCurrency(company.stats?.equity_value)}
               </TableCell>
             </TableRow>
           ))}
@@ -274,3 +340,4 @@ export function CompanyTable({
     </div>
   );
 }
+

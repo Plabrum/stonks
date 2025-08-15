@@ -8,10 +8,11 @@ dependencies = [
   "litestar[standard]",
   "litestar[sqlalchemy]",
   "litestar[opentelemetry]",
-  "taskiq-litestar",
-  "taskiq-pg",
   "msgspec",
   "psycopg2-binary>=2.9.10",
   "asyncpg>=0.30.0",
   "prometheus_client",
+  "alpaca-py",
+  "saq[postgres]",
+  "litestar-saq",
 ]

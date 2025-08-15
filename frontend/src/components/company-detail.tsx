@@ -9,8 +9,9 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { TrendingUp, DollarSign, Building2, FileText } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import { CompanySchema } from "@/openapi/requests";
 
-export function CompanyDetail({ companyData }: { companyData: Company }) {
+export function CompanyDetail({ companyData }: { companyData: CompanySchema }) {
   const {
     name,
     industry,

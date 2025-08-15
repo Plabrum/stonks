@@ -1,20 +1,70 @@
 services:
   postgres:
-    image: postgres:17
+    build:
+      context: .
+      dockerfile_inline: |
+        FROM postgres:17
+        RUN apt-get update && apt-get install -y curl
+        RUN apt-get -y install postgresql-17-cron
+        RUN echo "shared_preload_libraries='pg_cron'" >> /usr/share/postgresql/postgresql.conf.sample
+        RUN echo "cron.database_name='app'" >> /usr/share/postgresql/postgresql.conf.sample
+    command:
+      - -c
+      - shared_preload_libraries=pg_cron
+      - -c
+      - cron.database_name=app # optional, but only works if pg_cron is loaded
     restart: always
     environment:
       - POSTGRES_USER=litestar
       - POSTGRES_PASSWORD=password
       - POSTGRES_DB=app
     ports:
-      - "5432:5432"
+      - "5430:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+      # - ./init:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d app"]
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - stonks-net
+
+  # Litestar server, using your uv-based Dockerfile
+  # app:
+  #   build:
+  #     context: .
+  #     dockerfile: ./Dockerfile
+  #   environment:
+  #     # Your server needs to know where the app is; --app in your CMD
+  #     # reads LITESTAR_APP (e.g., "app.main:app" or whatever your ASGI callable is).
+  #     - LITESTAR_APP=app.main:app
+  #     - DATABASE_URL=postgresql+asyncpg://litestar:password@postgres:5432/app
+  #     # Any other env your app expects...
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #   ports:
+  #     - "8000:8000"
+  #   restart: unless-stopped
+  #   networks:
+  #     - stonks-net
+
+  worker:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    command:
+      ["taskiq", "worker", "app.utils:broker", "--fs-discover", "--reload"]
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://litestar:password@postgres:5432/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
     networks:
       - stonks-net
 

@@ -1,4 +1,4 @@
-'use client'
+"use client";
 import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -8,7 +8,7 @@ import { useDebounce } from "@/lib/use-debounce";
 import { SortCriterion, type CompanySearchSchema } from "@/openapi/requests";
 import { CompanyTable } from "@/components/company-table";
 
-import {  useCompanyServicePostCompanySearch } from "@/openapi/queries";
+import { useCompanyServicePostCompanySearch } from "@/openapi/queries";
 import { useSuspenseQuery } from "@tanstack/react-query";
 
 export function useSearchCompaniesQuery(input: CompanySearchSchema) {
@@ -20,16 +20,24 @@ export function useSearchCompaniesQuery(input: CompanySearchSchema) {
   });
 }
 
-export default function CompanySearchPage(){
+export default function CompanySearchPage() {
   const [searchSchema, setSearchSchema] = useState<CompanySearchSchema>({
     pagination: { offset: 0, limit: 50 },
   });
   const debouncedSearchSchema = useDebounce(searchSchema, 300);
 
-  const {data:companiesData} = useSearchCompaniesQuery(debouncedSearchSchema);
+  const { data: companiesData } = useSearchCompaniesQuery(
+    debouncedSearchSchema,
+  );
 
-  const industries = useMemo(
-    () => [...new Set(companiesData?.map((c) => c.industry) || [])],
+  const industries: string[] = useMemo(
+    () => [
+      ...new Set(
+        companiesData
+          ?.map((c) => c.industry)
+          .filter((i): i is string => Boolean(i)),
+      ),
+    ],
     [companiesData],
   );
 
@@ -74,10 +82,6 @@ export default function CompanySearchPage(){
       };
     });
   };
-
-  
-
-  
 
   const handleRangeFilter = (
     field: string,
