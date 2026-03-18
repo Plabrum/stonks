@@ -1,35 +1,39 @@
-'use client'
 import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 
 import { useDebounce } from "@/lib/use-debounce";
-import { SortCriterion, type CompanySearchSchema } from "@/openapi/requests";
+import type { CompanySearchSchema, SortCriterion } from "@/openapi/litestarAPI.schemas";
 import { CompanyTable } from "@/components/company-table";
-
-import {  useCompanyServicePostCompanySearch } from "@/openapi/queries";
+import { useSearch } from "@/openapi/company/company";
 import { useSuspenseQuery } from "@tanstack/react-query";
 
 export function useSearchCompaniesQuery(input: CompanySearchSchema) {
-  const { mutateAsync } = useCompanyServicePostCompanySearch();
+  const { mutateAsync } = useSearch();
 
   return useSuspenseQuery({
     queryKey: ["searchCompanies", input],
-    queryFn: () => mutateAsync({ requestBody: input }),
+    queryFn: () => mutateAsync({ data: input }),
   });
 }
 
-export default function CompanySearchPage(){
+export default function CompanySearchPage() {
   const [searchSchema, setSearchSchema] = useState<CompanySearchSchema>({
     pagination: { offset: 0, limit: 50 },
   });
   const debouncedSearchSchema = useDebounce(searchSchema, 300);
 
-  const {data:companiesData} = useSearchCompaniesQuery(debouncedSearchSchema);
+  const { data: companiesData } = useSearchCompaniesQuery(debouncedSearchSchema);
 
   const industries = useMemo(
-    () => [...new Set(companiesData?.map((c) => c.industry) || [])],
+    () => [
+      ...new Set(
+        (companiesData ?? [])
+          .map((c) => c.industry)
+          .filter((i): i is string => i !== undefined),
+      ),
+    ],
     [companiesData],
   );
 
@@ -74,10 +78,6 @@ export default function CompanySearchPage(){
       };
     });
   };
-
-  
-
-  
 
   const handleRangeFilter = (
     field: string,
@@ -143,6 +143,7 @@ export default function CompanySearchPage(){
         <CardContent>
           <CompanyTable
             companiesData={companiesData}
+            isLoading={false}
             searchSchema={searchSchema}
             industries={industries}
             onSort={handleSort}

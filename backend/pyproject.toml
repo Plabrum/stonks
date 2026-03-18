@@ -1,17 +1,73 @@
 [project]
-name = "Stonks"
+name = "stonks"
 version = "0.1.0"
 description = "Minimal Litestar backend using uv"
-requires-python = ">=3.10"
 readme = "README.md"
+requires-python = ">=3.13"
+
 dependencies = [
-  "litestar[standard]",
-  "litestar[sqlalchemy]",
-  "litestar[opentelemetry]",
-  "taskiq-litestar",
-  "taskiq-pg",
-  "msgspec",
-  "psycopg2-binary>=2.9.10",
-  "asyncpg>=0.30.0",
-  "prometheus_client",
+  # ─── Web framework ─────────────────────────────────────────────────────────
+  "litestar[standard,sqlalchemy]",
+  # ─── Database ──────────────────────────────────────────────────────────────
+  "sqlalchemy",
+  "psycopg2-binary",  # sync psycopg2 (alembic)
+  "asyncpg>=0.30.0",  # async driver (app runtime)
+  "alembic",
+  # ─── Config / runtime ──────────────────────────────────────────────────────
+  "python-dotenv",
+  # ─── Background queue ──────────────────────────────────────────────────────
+  "litestar-saq>=0.1.6",
+  "saq>=0.25.2",
+  "redis>=5.0",
 ]
+
+[dependency-groups]
+dev = [
+  "pytest>=8.0",
+  "pytest-asyncio>=0.24",
+  "httpx>=0.27",
+  "ruff>=0.9",
+  "basedpyright>=1.23",
+]
+
+# ─── Tool config ───────────────────────────────────────────────────────────────
+
+[tool.ruff]
+line-length = 120
+target-version = "py313"
+
+[tool.ruff.lint]
+select = [
+  "E",    # pycodestyle errors
+  "W",    # pycodestyle warnings
+  "F",    # pyflakes
+  "I",    # isort
+  "N",    # pep8-naming
+  "UP",   # pyupgrade
+  "PLC",  # pylint conventions
+]
+
+[tool.ruff.lint.per-file-ignores]
+"app/index.py"            = ["E402", "I001"]
+"alembic/env.py"          = ["E402"]
+"alembic/versions/*.py"   = ["E501", "W291", "UP035"]
+"app/config.py"           = ["N802"]
+"app/company/schemas.py"  = ["N815"]  # camelCase fields match frontend API contract
+"scripts/*.py"            = ["E402", "F401", "PLC0415"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app"]
+combine-as-imports = true
+
+[tool.basedpyright]
+typeCheckingMode = "basic"
+ignore = ["alembic/versions"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+pythonpath = ["."]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]

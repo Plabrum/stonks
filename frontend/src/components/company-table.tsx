@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { Link } from "@tanstack/react-router";
 import {
   Table,
   TableBody,
@@ -26,10 +26,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Filter, ArrowUpDown, ArrowUp, ArrowDown, Plus } from "lucide-react";
 import { cn, formatCurrency } from "@/lib/utils";
-import {
+import type {
   CompanySearchResultSchema,
-  type CompanySearchSchema,
-} from "@/openapi/requests";
+  CompanySearchSchema,
+} from "@/openapi/litestarAPI.schemas";
 
 interface RangeFilterProps {
   field: string;
@@ -257,7 +257,8 @@ export function CompanyTable({
             <TableRow key={company.id}>
               <TableCell className="font-medium">
                 <Link
-                  href={`/company/${company.ticker}`}
+                  to="/company/$ticker"
+                  params={{ ticker: company.ticker }}
                   className="text-blue-600 hover:underline"
                 >
                   {company.name}

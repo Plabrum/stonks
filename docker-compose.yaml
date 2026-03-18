@@ -1,0 +1,73 @@
+services:
+  postgres:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=litestar
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=app
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - stonks-net
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    networks:
+      - stonks-net
+
+  app:
+    image: ghcr.io/plabrum/stonks:latest
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://litestar:password@postgres/app
+      - ADMIN_DB_URL=postgresql://litestar:password@postgres/app
+      - REDIS_URL=redis://redis:6379
+      - FRONTEND_ORIGIN=http://walter:8000
+      - ENV=production
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    networks:
+      - stonks-net
+
+  worker:
+    image: ghcr.io/plabrum/stonks:latest
+    command: ["./scripts/start-worker.sh"]
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://litestar:password@postgres/app
+      - ADMIN_DB_URL=postgresql://litestar:password@postgres/app
+      - REDIS_URL=redis://redis:6379
+      - ENV=production
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - stonks-net
+
+volumes:
+  pgdata:
+
+networks:
+  stonks-net:
+    driver: bridge

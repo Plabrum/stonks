@@ -1,8 +1,5 @@
-"use client";
-
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useTheme } from "next-themes";
+import { Link, useRouterState } from "@tanstack/react-router";
+import { useTheme } from "@/components/theme-provider";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -18,7 +15,9 @@ const navigation = [
 ];
 
 export function Sidebar() {
-  const pathname = usePathname();
+  const {
+    location: { pathname },
+  } = useRouterState();
   const { theme, setTheme } = useTheme();
 
   const toggleTheme = () => {
@@ -53,7 +52,7 @@ export function Sidebar() {
           const Icon = item.icon;
 
           return (
-            <Link key={item.name} href={item.href}>
+            <Link key={item.name} to={item.href}>
               <Button
                 variant={isActive ? "secondary" : "ghost"}
                 className={cn(
@@ -78,7 +77,6 @@ export function Sidebar() {
 
       {/* Footer */}
       <div className="p-4 border-t border-border space-y-3">
-        {/* Market Status Card */}
         <Card className="p-3">
           <div className="flex items-center gap-2 mb-2">
             <TrendingUp className="h-4 w-4 text-green-600" />
@@ -89,7 +87,6 @@ export function Sidebar() {
           </p>
         </Card>
 
-        {/* Dark Mode Toggle */}
         <div className="flex items-center justify-between">
           <span className="text-sm font-medium">Theme</span>
           <Button

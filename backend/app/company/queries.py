@@ -6,9 +6,7 @@ from app.company.models import Company
 
 
 async def get_company_by_ticker(ticker: str, session: AsyncSession) -> Company:
-    result = await session.execute(
-        select(Company).where(Company.ticker == ticker)
-    )
+    result = await session.execute(select(Company).where(Company.ticker == ticker))
     company = result.scalars().first()
 
     if not company:

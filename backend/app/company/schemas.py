@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict, List, Literal, Optional
+from typing import Literal
 
 from msgspec import Struct
 
@@ -13,66 +13,66 @@ class FilingSchema(Struct, kw_only=True):
     filing_date: datetime
 
     # Income statement
-    revenue: Optional[float] = None
-    net_income: Optional[float] = None
-    ebitda: Optional[float] = None
-    shares_outstanding: Optional[float] = None
+    revenue: float | None = None
+    net_income: float | None = None
+    ebitda: float | None = None
+    shares_outstanding: float | None = None
 
     # Balance sheet
-    cash: Optional[float] = None
-    debt: Optional[float] = None
+    cash: float | None = None
+    debt: float | None = None
 
     # Metadata
-    document_url: Optional[str] = None
-    source: Optional[Literal["EDGAR", "Manual", "Other"]] = None
+    document_url: str | None = None
+    source: Literal["EDGAR", "Manual", "Other"] | None = None
 
     created_at: datetime
     updated_at: datetime
 
 
 class CompanyStatsSchema(Struct, kw_only=True):
-    ltm_revenue: Optional[float] = None
-    ltm_revenue_growth: Optional[float] = None
-    ltm_net_income: Optional[float] = None
-    ltm_ebitda: Optional[float] = None
+    ltm_revenue: float | None = None
+    ltm_revenue_growth: float | None = None
+    ltm_net_income: float | None = None
+    ltm_ebitda: float | None = None
 
-    share_price: Optional[float] = None
-    shares_outstanding: Optional[float] = None
-    equity_value: Optional[float] = None
-    cash: Optional[float] = None
-    debt: Optional[float] = None
-    enterprise_value: Optional[float] = None
+    share_price: float | None = None
+    shares_outstanding: float | None = None
+    equity_value: float | None = None
+    cash: float | None = None
+    debt: float | None = None
+    enterprise_value: float | None = None
 
-    multiple_ev_to_revenue: Optional[float] = None
-    multiple_ev_to_ebitda: Optional[float] = None
-    price_to_earnings: Optional[float] = None
+    multiple_ev_to_revenue: float | None = None
+    multiple_ev_to_ebitda: float | None = None
+    price_to_earnings: float | None = None
 
     # fund
-    median_fund_investment_percentage_change: Optional[float] = None
+    median_fund_investment_percentage_change: float | None = None
 
 
 class CompanyComparablesSchema(Struct, kw_only=True):
-    median_ev_to_revenue: Optional[float] = None
-    median_ev_to_ebitda: Optional[float] = None
-    median_pe_ratio: Optional[float] = None
+    median_ev_to_revenue: float | None = None
+    median_ev_to_ebitda: float | None = None
+    median_pe_ratio: float | None = None
 
 
 class CompanyPredictionsSchema(Struct, kw_only=True):
-    projected_5y_share_price: Optional[float] = None
+    projected_5y_share_price: float | None = None
 
 
 class CompanySchema(Struct, kw_only=True):
     id: str
     name: str
     ticker: str
-    industry: Optional[str] = None
+    industry: str | None = None
 
-    filings: List[FilingSchema]
-    latest_filing: Optional[FilingSchema] = None
+    filings: list[FilingSchema]
+    latest_filing: FilingSchema | None = None
 
-    stats: Optional[CompanyStatsSchema] = None
-    comparables: Optional[CompanyComparablesSchema] = None
-    predictions: Optional[CompanyPredictionsSchema] = None
+    stats: CompanyStatsSchema | None = None
+    comparables: CompanyComparablesSchema | None = None
+    predictions: CompanyPredictionsSchema | None = None
 
     created_at: datetime
     updated_at: datetime
@@ -84,35 +84,35 @@ class SortCriterion(Struct, kw_only=True):
 
 
 class NumericRange(Struct, kw_only=True):
-    min: Optional[float] = None
-    max: Optional[float] = None
+    min: float | None = None
+    max: float | None = None
 
 
 class CompanySearchFilters(Struct, kw_only=True):
-    industries: Optional[List[str]] = None
-    subIndustries: Optional[List[str]] = None
-    numericRanges: Optional[Dict[str, NumericRange]] = None
+    industries: list[str] | None = None
+    subIndustries: list[str] | None = None  # TODO: rename to sub_industries (update frontend too)
+    numericRanges: dict[str, NumericRange] | None = None  # TODO: rename to numeric_ranges (update frontend too)
 
 
 class Pagination(Struct, kw_only=True):
-    offset: Optional[int] = None
-    limit: Optional[int] = None
+    offset: int | None = None
+    limit: int | None = None
 
 
 class CompanySearchSchema(Struct, kw_only=True):
-    search: Optional[str] = None
-    filters: Optional[CompanySearchFilters] = None
-    sorting: Optional[List[SortCriterion]] = None
-    pagination: Optional[Pagination] = None
+    search: str | None = None
+    filters: CompanySearchFilters | None = None
+    sorting: list[SortCriterion] | None = None
+    pagination: Pagination | None = None
 
 
 class CompanySearchResultSchema(Struct, kw_only=True):
     id: str
     name: str
     ticker: str
-    industry: Optional[str] = None
-    equity_value: Optional[float] = None
-    ltm_revenue: Optional[float] = None
-    multiple_ev_to_revenue: Optional[float] = None
+    industry: str | None = None
+    equity_value: float | None = None
+    ltm_revenue: float | None = None
+    multiple_ev_to_revenue: float | None = None
     created_at: datetime
     updated_at: datetime

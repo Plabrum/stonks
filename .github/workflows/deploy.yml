@@ -6,14 +6,38 @@ on:
       - main
 
 jobs:
-  deploy:
-    name: Trigger Home Server Deploy
+  build:
+    name: Build and Push to GHCR
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./backend/Dockerfile
+          push: true
+          tags: ghcr.io/plabrum/stonks:latest
+
+  deploy:
+    name: Deploy to walter
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
       - name: Connect to Tailscale
         uses: tailscale/github-action@v3
         with:
@@ -22,8 +46,12 @@ jobs:
           tags: tag:ci
           version: latest
 
-      - name: Call Home Server Webhook
-        run: |
-          curl -X POST http://walter:9000/webhook \
-            -H "Content-Type: application/json" \
-            -d '{"trigger": "github-actions"}'
+      - name: SSH and deploy
+        uses: appleboy/ssh-action@v1
+        with:
+          host: walter
+          username: phil
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            docker compose -f ~/repos/stonks/docker-compose.yaml pull
+            docker compose -f ~/repos/stonks/docker-compose.yaml up -d
