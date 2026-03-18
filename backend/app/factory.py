@@ -55,8 +55,8 @@ def create_app() -> Litestar:
 
         index_path = static_dir / "index.html"
 
-        @get("/{path:path}", include_in_schema=False)
-        async def spa_handler(path: str) -> Response:
+        @get(["/", "/{path:path}"], include_in_schema=False)
+        async def spa_handler(path: str = "") -> Response:
             return Response(
                 content=index_path.read_text(),
                 media_type=MediaType.HTML,
