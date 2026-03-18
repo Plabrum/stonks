@@ -27,12 +27,12 @@ services:
   app:
     image: ghcr.io/plabrum/stonks:latest
     ports:
-      - "8000:8000"
+      - "80:8000"
     environment:
       - DATABASE_URL=postgresql+asyncpg://litestar:password@postgres/app
       - ADMIN_DB_URL=postgresql://litestar:password@postgres/app
       - REDIS_URL=redis://redis:6379
-      - FRONTEND_ORIGIN=http://walter:8000
+      - FRONTEND_ORIGIN=http://walter
       - ENV=production
     restart: unless-stopped
     depends_on:
