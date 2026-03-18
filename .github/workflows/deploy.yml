@@ -6,9 +6,32 @@ on:
       - main
 
 jobs:
+  detect-changes:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+    outputs:
+      backend_changed: ${{ steps.changes.outputs.backend }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Detect changes
+        id: changes
+        run: |
+          if git diff --name-only HEAD^ HEAD | grep -qE '^\.github/workflows/'; then
+            echo "backend=true" >> $GITHUB_OUTPUT
+          elif git diff --name-only HEAD^ HEAD | grep -qE '^backend/'; then
+            echo "backend=true" >> $GITHUB_OUTPUT
+          else
+            echo "backend=false" >> $GITHUB_OUTPUT
+          fi
+
   build:
     name: Build and Push to GHCR
     runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.backend_changed == 'true'
     permissions:
       contents: read
       packages: write
@@ -35,7 +58,8 @@ jobs:
   deploy:
     name: Deploy to walter
     runs-on: ubuntu-latest
-    needs: build
+    needs: [detect-changes, build]
+    if: always() && needs.detect-changes.result == 'success' && (needs.build.result == 'success' || needs.build.result == 'skipped')
 
     steps:
       - name: Connect to Tailscale
@@ -46,15 +70,11 @@ jobs:
           curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/noble.noarmor.gpg | sudo tee /usr/share/keyrings/tailscale-archive-keyring.gpg >/dev/null
           curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/noble.tailscale-keyring.list | sudo tee /etc/apt/sources.list.d/tailscale.list
           sudo apt-get update -qq && sudo apt-get install -y tailscale
-          ACCESS_TOKEN=$(curl -fsSL -X POST https://api.tailscale.com/api/v2/oauth/token \
-            -d "client_id=${TS_OAUTH_CLIENT_ID}&client_secret=${TS_OAUTH_SECRET}&grant_type=client_credentials" \
-            | jq -r .access_token)
-          AUTH_KEY=$(curl -fsSL -X POST https://api.tailscale.com/api/v2/authkeys \
-            -H "Authorization: Bearer ${ACCESS_TOKEN}" \
-            -H "Content-Type: application/json" \
-            -d '{"capabilities":{"devices":{"create":{"reusable":false,"ephemeral":true,"preauthorized":true,"tags":["tag:ci"]}}},"expirySeconds":300}' \
-            | jq -r .key)
-          sudo tailscale up --authkey="${AUTH_KEY}" --ephemeral --hostname=github-actions
+          sudo tailscale up \
+            --client-id="${TS_OAUTH_CLIENT_ID}" \
+            --client-secret="${TS_OAUTH_SECRET}" \
+            --advertise-tags=tag:ci \
+            --hostname=github-actions
 
       - name: SSH and deploy
         uses: appleboy/ssh-action@v1
