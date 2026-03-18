@@ -39,12 +39,22 @@ jobs:
 
     steps:
       - name: Connect to Tailscale
-        uses: tailscale/github-action@v3
-        with:
-          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
-          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
-          tags: tag:ci
-          version: latest
+        env:
+          TS_OAUTH_CLIENT_ID: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          TS_OAUTH_SECRET: ${{ secrets.TS_OAUTH_SECRET }}
+        run: |
+          curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/noble.noarmor.gpg | sudo tee /usr/share/keyrings/tailscale-archive-keyring.gpg >/dev/null
+          curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/noble.tailscale-keyring.list | sudo tee /etc/apt/sources.list.d/tailscale.list
+          sudo apt-get update -qq && sudo apt-get install -y tailscale
+          ACCESS_TOKEN=$(curl -fsSL -X POST https://api.tailscale.com/api/v2/oauth/token \
+            -d "client_id=${TS_OAUTH_CLIENT_ID}&client_secret=${TS_OAUTH_SECRET}&grant_type=client_credentials" \
+            | jq -r .access_token)
+          AUTH_KEY=$(curl -fsSL -X POST https://api.tailscale.com/api/v2/authkeys \
+            -H "Authorization: Bearer ${ACCESS_TOKEN}" \
+            -H "Content-Type: application/json" \
+            -d '{"capabilities":{"devices":{"create":{"reusable":false,"ephemeral":true,"preauthorized":true,"tags":["tag:ci"]}}},"expirySeconds":300}' \
+            | jq -r .key)
+          sudo tailscale up --authkey="${AUTH_KEY}" --ephemeral --hostname=github-actions
 
       - name: SSH and deploy
         uses: appleboy/ssh-action@v1
