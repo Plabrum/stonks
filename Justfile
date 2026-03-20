@@ -13,6 +13,14 @@ install:
 
 # ─── Database ─────────────────────────────────────────────────────────────────
 
+# Start dev postgres
+db-start:
+    docker compose -f docker-compose.dev.yml up -d
+
+# Stop dev postgres
+db-stop:
+    docker compose -f docker-compose.dev.yml down
+
 # Create a new migration from model changes
 db-migrate +message:
     cd backend && uv run alembic revision --autogenerate -m "{{message}}"
