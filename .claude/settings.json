@@ -6,6 +6,26 @@
     "commit-commands@claude-plugins-official": true
   },
   "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "EnterWorktree",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash scripts/worktree-setup.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "ExitWorktree",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash scripts/worktree-teardown.sh"
+          }
+        ]
+      }
+    ],
     "Stop": [
       {
         "matcher": "",
