@@ -1,5 +1,13 @@
 # Stonks Justfile — https://just.systems
 
+set dotenv-filename := ".env.local"
+set dotenv-load := true
+set dotenv-required := false
+
+# Configurable ports (override via .env.local or env vars for worktree dev)
+export BACKEND_PORT := env("BACKEND_PORT", "8000")
+export FRONTEND_PORT := env("FRONTEND_PORT", "5173")
+
 # List available commands
 default:
     @just --list
@@ -45,11 +53,11 @@ dev:
 
 # Start Litestar backend with hot reload
 dev-backend:
-    cd backend && uv run litestar --app app.index:app run -r -d -p 8000
+    cd backend && uv run litestar --app app.index:app run -r -d -p ${BACKEND_PORT}
 
 # Start Vite frontend dev server
 dev-frontend:
-    cd frontend && npm run dev
+    cd frontend && npm run dev -- --port ${FRONTEND_PORT}
 
 # Start SAQ worker
 dev-worker:
@@ -57,9 +65,27 @@ dev-worker:
 
 # ─── Codegen ──────────────────────────────────────────────────────────────────
 
-# Generate API client from live backend schema (requires backend on :8000)
+# Generate API client from live backend schema (requires backend running)
 codegen:
-    cd frontend && npx orval
+    cd frontend && OPENAPI_URL="http://localhost:${BACKEND_PORT}/schema/openapi.json" npx orval
+
+# ─── Code Quality ─────────────────────────────────────────────────────────
+
+# Lint backend code
+lint:
+    cd backend && uv run ruff check .
+
+# Lint frontend code
+lint-frontend:
+    cd frontend && npm run lint
+
+# Format backend code
+fmt:
+    cd backend && uv run ruff format .
+
+# Type-check backend code
+typecheck:
+    cd backend && uv run basedpyright
 
 # ─── Build ────────────────────────────────────────────────────────────────────
 

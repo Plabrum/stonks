@@ -1,0 +1,21 @@
+{
+  "enabledPlugins": {
+    "frontend-design@claude-plugins-official": true,
+    "context7@claude-plugins-official": true,
+    "feature-dev@claude-plugins-official": true,
+    "commit-commands@claude-plugins-official": true
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd /home/phil/repos/stonks && py_files=$(git diff --name-only --diff-filter=M HEAD -- 'backend/**/*.py' 2>/dev/null; git ls-files --others --exclude-standard -- 'backend/**/*.py' 2>/dev/null); if [ -n \"$py_files\" ]; then cd backend && echo \"$py_files\" | sed 's|^backend/||' | xargs uv run ruff format 2>/dev/null && echo \"$py_files\" | sed 's|^backend/||' | xargs uv run ruff check --fix 2>/dev/null; fi; js_files=$(git diff --name-only --diff-filter=M HEAD -- 'frontend/**/*.ts' 'frontend/**/*.tsx' 'frontend/**/*.js' 'frontend/**/*.jsx' 2>/dev/null; git ls-files --others --exclude-standard -- 'frontend/**/*.ts' 'frontend/**/*.tsx' 'frontend/**/*.js' 'frontend/**/*.jsx' 2>/dev/null); if [ -n \"$js_files\" ]; then cd /home/phil/repos/stonks/frontend && echo \"$js_files\" | sed 's|^frontend/||' | xargs npx eslint --fix 2>/dev/null; fi; true"
+          }
+        ]
+      }
+    ]
+  }
+}
