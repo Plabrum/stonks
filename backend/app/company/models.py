@@ -1,14 +1,13 @@
-# models/business.py
 from sqlalchemy import String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.utils import Base
+from app.base.mixins import TimestampMixin
+from app.base.models import BaseDBModel
 
 
-class Company(Base):
+class Company(TimestampMixin, BaseDBModel):
     __tablename__ = "businesses"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     ticker: Mapped[str] = mapped_column(
         String(16),

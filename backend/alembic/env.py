@@ -1,19 +1,17 @@
 """Alembic environment — loads app config, discovers models, runs migrations."""
 
-import glob
-import importlib
 from logging.config import fileConfig
 
 from sqlalchemy import create_engine
 from sqlalchemy.engine import Connection
 
 from alembic import context
+from app.base.models import BaseDBModel
 from app.config import config as app_config
-from app.utils import Base
+from app.utils.discovery import discover_and_import
 
-# Auto-discover all models so their tables are registered in Base.metadata
-for _path in glob.glob("app/**/models.py", recursive=True):
-    importlib.import_module(_path.replace("/", ".").removesuffix(".py"))
+# Auto-discover all models so their tables are registered in BaseDBModel.metadata
+discover_and_import(["models.py"], base_path="app")
 
 # ── Alembic config ────────────────────────────────────────────────────────────
 config = context.config
@@ -21,7 +19,7 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-target_metadata = Base.metadata
+target_metadata = BaseDBModel.metadata
 database_url = app_config.ADMIN_DB_URL
 
 

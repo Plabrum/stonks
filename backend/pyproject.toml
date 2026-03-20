@@ -10,11 +10,12 @@ dependencies = [
   "litestar[standard,sqlalchemy]",
   # ─── Database ──────────────────────────────────────────────────────────────
   "sqlalchemy",
-  "psycopg2-binary",  # sync psycopg2 (alembic)
-  "asyncpg>=0.30.0",  # async driver (app runtime)
+  "psycopg2-binary", # sync psycopg2 (alembic)
+  "asyncpg>=0.30.0", # async driver (app runtime)
   "alembic",
   # ─── Config / runtime ──────────────────────────────────────────────────────
   "python-dotenv",
+  "msgspec>=0.18",
   # ─── Background queue ──────────────────────────────────────────────────────
   "litestar-saq>=0.1.6",
   "saq>=0.25.2",

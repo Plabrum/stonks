@@ -6,13 +6,13 @@ from litestar.enums import MediaType
 from litestar.plugins.sqlalchemy import SQLAlchemyPlugin
 from litestar.response import Response
 from litestar.static_files import StaticFilesConfig
-from litestar_saq import QueueConfig, SAQConfig, SAQPlugin
+from litestar_saq import SAQConfig, SAQPlugin
 
 from app.company.routes import companies_router
-from app.company.tasks import ingest_company_data
 from app.config import config
-from app.queue.config import shutdown, startup
-from app.utils import db_config, provide_transaction
+from app.queue.config import queue_config
+from app.utils.db import db_config
+from app.utils.deps import get_dependencies
 
 
 @get("/health", include_in_schema=False)
@@ -28,14 +28,7 @@ def create_app() -> Litestar:
         allow_headers=["Content-Type", "Authorization"],
     )
 
-    queue_config = QueueConfig(
-        dsn=config.REDIS_URL,
-        name="stonks",
-        tasks=[ingest_company_data],
-        startup=startup,
-        shutdown=shutdown,
-    )
-    saq_config = SAQConfig(queue_configs=[queue_config])
+    saq_config = SAQConfig(queue_configs=queue_config)
     saq_plugin = SAQPlugin(config=saq_config)
 
     api_router = Router(path="/api", route_handlers=[companies_router])
@@ -66,7 +59,7 @@ def create_app() -> Litestar:
 
     return Litestar(
         route_handlers=route_handlers,
-        dependencies={"transaction": provide_transaction},
+        dependencies=get_dependencies(),
         plugins=[SQLAlchemyPlugin(db_config), saq_plugin],
         cors_config=cors_config,
         static_files_config=static_configs,
